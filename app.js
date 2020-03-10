@@ -9,10 +9,10 @@ const {
   Pool
 } = require('pg')
 const pool = new Pool({
-  user: 'pisckipy',
-  host: 'localhost',
-  database: 'football',
-  password: 'Bismillah',
+  user: 'cutgjnpbhhnlxk',
+  host: 'ec2-3-229-210-93.compute-1.amazonaws.com',
+  database: 'de3rqa7h6sj6eo',
+  password: 'aee78baf84fdfcc6853e39bf27f42714a658967a73e9f74c72554b235d0f8642',
   port: 5432,
 })
 

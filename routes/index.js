@@ -3,7 +3,9 @@ const router = express.Router();
 
 module.exports = (pool) => {
   router.get('/leaguestanding', function (req, res, next) {
-    pool.query('SELECT * FROM record ORDER BY points DESC', (err, data) => {
+    let sqlGet = `SELECT * FROM record ORDER BY points DESC`
+    pool.query(sqlGet, (err, data) => {
+      
       if (err) res.send(err)
       let result = []
       data.rows.forEach(item => {
