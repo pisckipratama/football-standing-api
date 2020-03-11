@@ -2,24 +2,8 @@ const express = require('express');
 const router = express.Router();
 
 module.exports = (pool) => {
-  router.get('/leaguestanding', function (req, res, next) {
-    let sqlGet = `SELECT * FROM record ORDER BY points DESC`
-    pool.query(sqlGet, (err, data) => {
-      
-      if (err) res.send(err)
-      let result = []
-      data.rows.forEach(item => {
-        result.push({
-          clubname: item.clubname,
-          points: item.points
-        })
-      })
-      res.json({
-        result
-      });
-    })
-  });
 
+  /* POST Record Game */
   router.post('/recordgame', (req, res) => {
     const {
       clubhomename,
@@ -55,23 +39,81 @@ module.exports = (pool) => {
 
     pool.query(sqlShowHomeClub, (err, dataHome) => {
       if (err) res.send(err)
-      let pointHomeResult = dataHome.rows[0].points + homePoints;
-      let sqlUpdatePointHomeClub = `UPDATE record SET points=${pointHomeResult} WHERE clubname='${clubhomename}'`
-      pool.query(sqlUpdatePointHomeClub, (err) => {
-        if (err) res.send(err)
-        pool.query(sqlShowAwayClub, (err, dataAway) => {
-          if (err) res.send(err)
-          let pointAwayResult = dataAway.rows[0].points + awayPoints;
-          let sqlUpdatePointAwayClub = `UPDATE record SET points=${pointAwayResult} WHERE clubname='${clubawayname}'`
-          pool.query(sqlUpdatePointAwayClub, err => {
+      let pointHomeResult = (dataHome.rows.length > 0 ? dataHome.rows[0].points : 0) + homePoints;
+      if (dataHome.rows.length == 0) {
+        let sqlAddHome = `INSERT INTO record(clubname, points, createdat) VALUES('${clubhomename}', ${pointHomeResult}, now())`;
+        console.log(sqlAddHome)
+        pool.query(sqlAddHome, err => {
+          if (err) res.status(500).json(err)
+          pool.query(sqlShowAwayClub, (err, dataAway) => {
             if (err) res.send(err)
-            res.json(result);
+            let pointAwayResult = (dataAway.rows.length > 0 ? dataAway.rows[0].points : 0) + awayPoints;
+            if (dataAway.rows.length == 0) {
+              let sqlAddAway = `INSERT INTO record(clubname, points, createdat) VALUES('${clubawayname}', ${pointAwayResult}, now())`;
+              console.log(sqlAddAway)
+              pool.query(sqlAddAway, err => {
+                if (err) res.send(err)
+                res.json(result);
+              })
+            } else {
+              let sqlUpdatePointAwayClub = `UPDATE record SET points=${pointAwayResult} WHERE clubname='${clubawayname}'`
+              console.log(sqlUpdatePointAwayClub)
+              pool.query(sqlUpdatePointAwayClub, err => {
+                if (err) res.send(err)
+                res.json(result);
+              })
+            }
           })
         })
-      })
+      } else {
+        let sqlUpdatePointHomeClub = `UPDATE record SET points=${pointHomeResult} WHERE clubname='${clubhomename}'`
+        console.log(sqlUpdatePointHomeClub)
+        pool.query(sqlUpdatePointHomeClub, (err) => {
+          if (err) res.send(err)
+          pool.query(sqlShowAwayClub, (err, dataAway) => {
+            if (err) res.send(err)
+            let pointAwayResult = (dataAway.rows.length > 0 ? dataAway.rows[0].points : 0) + awayPoints;
+            if (dataAway.rows.length == 0) {
+              let sqlAddAway = `INSERT INTO record(clubname, points, createdat) VALUES('${clubawayname}', ${pointAwayResult}, now())`;
+              console.log(sqlAddAway)
+              pool.query(sqlAddAway, err => {
+                if (err) res.send(err)
+                res.json(result);
+              })
+            } else {
+              let sqlUpdatePointAwayClub = `UPDATE record SET points=${pointAwayResult} WHERE clubname='${clubawayname}'`
+              console.log(sqlUpdatePointAwayClub)
+              pool.query(sqlUpdatePointAwayClub, err => {
+                if (err) res.send(err)
+                res.json(result);
+              })
+            }
+          })
+        })
+      }
     })
   })
 
+  /* GET League Standing */
+  router.get('/leaguestanding', function (req, res, next) {
+    let sqlGet = `SELECT * FROM record ORDER BY points DESC`
+    pool.query(sqlGet, (err, data) => {
+
+      if (err) res.send(err)
+      let result = []
+      data.rows.forEach(item => {
+        result.push({
+          clubname: item.clubname,
+          points: item.points
+        })
+      })
+      res.json({
+        result
+      });
+    })
+  });
+
+  /* GET Rank Club */
   router.get('/rank', (req, res) => {
     let clubname = req.query.clubname;
     console.log(clubname)
@@ -92,7 +134,7 @@ module.exports = (pool) => {
           })
         }
       })
-      
+
       res.json(result)
     })
   })
