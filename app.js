@@ -4,6 +4,8 @@ const logger = require('morgan');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsdoc = require('swagger-jsdoc');
 
 const indexRouter = require('./routes/index');
 
@@ -24,7 +26,36 @@ mongoose.connect('mongodb+srv://pisckipy:nopassword@reviewapi-a48cn.mongodb.net/
   .then(() => console.log('successfully connected with mongodb.'))
   .catch(err => console.error(err))
 
+// Swagger set up
+const options = {
+  swaggerDefinition: {
+    openapi: "3.0.0",
+    info: {
+      title: "Football League Table API",
+      version: "1.0.0",
+      description: "Check your favorite team!",
+      license: {
+        name: "MIT",
+        url: "https://choosealicense.com/licenses/mit/"
+      },
+      contact: {
+        name: "Piscki Pratama",
+        url: "https://pisckipratama.github.io",
+        email: "pisckipratama@gmail.com"
+      }
+    },
+    servers: [
+      {
+        url: "http://localhost:3000/football/"
+      }
+    ]
+  },
+  apis: ['./routes/index.js']
+};
+const specs = swaggerJsdoc(options);
+app.use("/football/v1/docs", swaggerUi.serve);
+app.get("/football/v1/docs", swaggerUi.setup(specs, { explorer: true }));
 
-app.use('/football', indexRouter);
+app.use('/football/v1/', indexRouter);
 
 module.exports = app;

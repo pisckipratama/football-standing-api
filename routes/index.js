@@ -1,6 +1,15 @@
+"use strict"
+
 const express = require('express');
 const router = express.Router();
-const football = require('../controller/index.controller')
+const football = require('../controller/index.controller');
+
+/**
+ * @swagger
+ *  /users:
+ *    get:
+ *      description: This is swag
+ */
 
 router.get('/', (req, res) => res.json({ status: "API it's working", message: "Happy coding!" }));
 
