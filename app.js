@@ -27,31 +27,7 @@ mongoose.connect('mongodb+srv://pisckipy:nopassword@reviewapi-a48cn.mongodb.net/
   .catch(err => console.error(err))
 
 // Swagger set up
-const options = {
-  swaggerDefinition: {
-    openapi: "3.0.0",
-    info: {
-      title: "Football League Table API",
-      version: "1.0.0",
-      description: "Check your favorite team!",
-      license: {
-        name: "MIT",
-        url: "https://choosealicense.com/licenses/mit/"
-      },
-      contact: {
-        name: "Piscki Pratama",
-        url: "https://pisckipratama.github.io",
-        email: "pisckipratama@gmail.com"
-      }
-    },
-    servers: [
-      {
-        url: "http://localhost:3000/football/"
-      }
-    ]
-  },
-  apis: ['./routes/index.js']
-};
+const options = require('./swagger')
 const specs = swaggerJsdoc(options);
 app.use("/football/v1/docs", swaggerUi.serve);
 app.get("/football/v1/docs", swaggerUi.setup(specs, { explorer: true }));
